@@ -92,11 +92,13 @@ export type EventItem = {
 
 export type DocumentCategory =
   | 'Allgemein'
+  | 'Protokolle'
   | 'Sitzungen'
   | 'Finanzen'
   | 'Kommunikation'
   | 'Events'
-  | 'Vorlagen';
+  | 'Vorlagen'
+  | 'Sonstiges';
 
 export type DriveRef = {
   fileId: string;
@@ -111,6 +113,7 @@ export type DocumentItem = {
   schuljahr: Schuljahr;
   titel: string;
   kategorie: DocumentCategory;
+  beschreibung?: string;
   datum?: string; // ISO date
   tags: string[];
   notizen?: string;

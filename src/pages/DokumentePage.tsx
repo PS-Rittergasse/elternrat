@@ -45,6 +45,11 @@ export default function DokumentePage() {
       notizen: '',
       storage: 'link',
       linkUrl: undefined,
+      beschreibung: '',
+      kategorie: 'Sonstiges',
+      storage: 'link',
+      linkUrl: '',
+      drive: undefined,
       tags: [],
       createdAt: now,
       updatedAt: now
@@ -61,6 +66,11 @@ export default function DokumentePage() {
       notizen: '',
       storage: 'link',
       linkUrl: undefined,
+      beschreibung: '',
+      kategorie: 'Sonstiges',
+      storage: 'link',
+      linkUrl: '',
+      drive: undefined,
       tags: [],
       createdAt: now,
       updatedAt: now
@@ -80,6 +90,20 @@ export default function DokumentePage() {
     }
     const storage = draft.drive?.fileId ? 'drive' : 'link';
     actions.upsertDocument({ ...draft, schuljahr: year, storage });
+    const hasLink = (draft.linkUrl ?? '').trim().length > 0;
+    const hasDrive = !!draft.drive?.fileId;
+    if (!hasLink && !hasDrive) {
+      setStatusMsg('Link oder Upload fehlt');
+      return;
+    }
+
+    const storage: DocumentItem['storage'] = hasDrive ? 'drive' : 'link';
+    const next: DocumentItem = {
+      ...draft,
+      schuljahr: year,
+      storage
+    };
+    actions.upsertDocument(next);
     setStatusMsg('Gespeichert');
     resetDraft();
   };
@@ -120,6 +144,7 @@ export default function DokumentePage() {
           fileId: r.fileId,
           name: r.name,
           mimeType: r.mimeType,
+          size: r.size,
           webViewLink: r.webViewLink
         }
       }));
@@ -216,6 +241,24 @@ export default function DokumentePage() {
                       Link öffnen
                     </a>
                   ) : null}
+                    {d.storage === 'drive' || d.drive ? <Badge variant="neutral">Drive</Badge> : null}
+                  </div>
+                  <div className="mt-0.5 text-xs text-primary-600">Update: {fmtDateShort(d.updatedAt)}</div>
+                  {d.beschreibung ? <div className="mt-1 text-sm text-primary-700">{d.beschreibung}</div> : null}
+                  {(() => {
+                    const href = d.drive?.webViewLink ?? d.linkUrl;
+                    if (!href) return null;
+                    return (
+                      <a
+                        className="mt-2 inline-block text-sm underline decoration-primary-300"
+                        href={href}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Link öffnen
+                      </a>
+                    );
+                  })()}
                 </div>
                 <Button size="sm" variant="destructive" onClick={() => actions.deleteDocument(d.id)}>
                   Löschen

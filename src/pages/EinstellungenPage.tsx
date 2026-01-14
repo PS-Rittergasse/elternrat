@@ -34,7 +34,7 @@ export default function EinstellungenPage() {
   const setSettings = (patch: Partial<Settings>) => actions.setSettings(patch);
 
   const onExport = () => {
-    const json = actions.exportStateJson();
+    const json = JSON.stringify(state, null, 2);
     downloadText(`elternrat-export-${new Date().toISOString().slice(0, 10)}.json`, json, 'application/json;charset=utf-8');
   };
 
