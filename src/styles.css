@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Grayscale scale (HSL triples) */
+  --color-primary-50: 210 40% 98%;
+  --color-primary-100: 210 40% 96%;
+  --color-primary-200: 214 32% 91%;
+  --color-primary-300: 213 27% 84%;
+  --color-primary-400: 215 20% 65%;
+  --color-primary-500: 215 16% 47%;
+  --color-primary-600: 215 19% 35%;
+  --color-primary-700: 215 25% 27%;
+  --color-primary-800: 217 33% 17%;
+  --color-primary-900: 222 47% 11%;
+
+  /* Semantic status colors (use sparingly) */
+  --color-success: 142 76% 36%;
+  --color-warning: 38 92% 50%;
+  --color-error: 0 72% 51%;
+
+  --radius: 0.75rem;
+}
+
+html {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+body {
+  @apply bg-primary-50 text-primary-900 antialiased;
+}
+
+* {
+  scrollbar-color: hsl(var(--color-primary-300)) hsl(var(--color-primary-50));
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--color-primary-900) / 0.75);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: hsl(var(--color-primary-900) / 0.12);
+}
