@@ -39,8 +39,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # IMPORTANT: set this to your repo name for project pages
-          VITE_BASE: "/<REPO>/"
+          VITE_BASE: "/${{ github.event.repository.name }}/"
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
