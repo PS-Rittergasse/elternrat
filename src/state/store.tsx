@@ -17,6 +17,7 @@ type AppStore = {
   state: PersistedState;
   actions: {
     setSettings: (patch: Partial<Settings>) => void;
+    exportStateJson: () => string;
     importStateJson: (json: string) => void;
     resetAll: () => void;
 
@@ -65,6 +66,8 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
         }
       }));
     };
+
+    const exportStateJson = () => JSON.stringify(state, null, 2);
 
     const importStateJson = (json: string) => {
       const parsed = JSON.parse(json) as PersistedState;
@@ -296,6 +299,7 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
     return {
       setSettings,
       importStateJson,
+      exportStateJson,
       resetAll,
       upsertMember,
       deleteMember,
@@ -312,7 +316,7 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
       upsertAnnouncement,
       deleteAnnouncement
     };
-  }, [canWrite]);
+  }, [canWrite, state]);
 
   const value = useMemo<AppStore>(() => ({ state, actions }), [state, actions]);
 

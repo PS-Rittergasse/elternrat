@@ -11,7 +11,14 @@ import type { DocumentCategory, DocumentItem } from '../lib/types';
 import { backendUploadBase64, fileToBase64 } from '../lib/api/elternratBackend';
 import { useAppStore } from '../state/store';
 
-const categories: DocumentCategory[] = ['Protokolle', 'Vorlagen', 'Finanzen', 'Sonstiges'];
+const categories: DocumentCategory[] = [
+  'Allgemein',
+  'Sitzungen',
+  'Finanzen',
+  'Kommunikation',
+  'Events',
+  'Vorlagen'
+];
 
 export default function DokumentePage() {
   const { state, actions } = useAppStore();
@@ -34,9 +41,10 @@ export default function DokumentePage() {
       id: uid(),
       schuljahr: year,
       titel: '',
-      beschreibung: '',
-      kategorie: 'Sonstiges',
-      linkUrl: '',
+      kategorie: 'Allgemein',
+      notizen: '',
+      storage: 'link',
+      linkUrl: undefined,
       tags: [],
       createdAt: now,
       updatedAt: now
@@ -49,9 +57,10 @@ export default function DokumentePage() {
       id: uid(),
       schuljahr: year,
       titel: '',
-      beschreibung: '',
-      kategorie: 'Sonstiges',
-      linkUrl: '',
+      kategorie: 'Allgemein',
+      notizen: '',
+      storage: 'link',
+      linkUrl: undefined,
       tags: [],
       createdAt: now,
       updatedAt: now
@@ -65,11 +74,12 @@ export default function DokumentePage() {
       setStatusMsg('Titel fehlt');
       return;
     }
-    if (!draft.linkUrl.trim() && !draft.driveFileId) {
+    if (!draft.linkUrl && !draft.drive?.fileId) {
       setStatusMsg('Link oder Upload fehlt');
       return;
     }
-    actions.upsertDocument({ ...draft, schuljahr: year });
+    const storage = draft.drive?.fileId ? 'drive' : 'link';
+    actions.upsertDocument({ ...draft, schuljahr: year, storage });
     setStatusMsg('Gespeichert');
     resetDraft();
   };
@@ -104,11 +114,14 @@ export default function DokumentePage() {
 
       setDraft((p) => ({
         ...p,
+        storage: 'drive',
         linkUrl: r.webViewLink,
-        driveFileId: r.fileId,
-        driveWebViewLink: r.webViewLink,
-        fileName: r.name,
-        mimeType: r.mimeType
+        drive: {
+          fileId: r.fileId,
+          name: r.name,
+          mimeType: r.mimeType,
+          webViewLink: r.webViewLink
+        }
       }));
 
       setStatusMsg('Upload ok');
@@ -153,14 +166,17 @@ export default function DokumentePage() {
             </Select>
           </div>
           <div className="md:col-span-2">
-            <label className="text-xs font-medium text-primary-700">Beschreibung</label>
-            <Textarea value={draft.beschreibung ?? ''} onChange={(e) => setDraft((p) => ({ ...p, beschreibung: e.target.value }))} />
+            <label className="text-xs font-medium text-primary-700">Notizen</label>
+            <Textarea
+              value={draft.notizen ?? ''}
+              onChange={(e) => setDraft((p) => ({ ...p, notizen: e.target.value }))}
+            />
           </div>
           <div className="md:col-span-2">
             <label className="text-xs font-medium text-primary-700">Link</label>
             <Input
               value={draft.linkUrl ?? ''}
-              onChange={(e) => setDraft((p) => ({ ...p, linkUrl: e.target.value }))}
+              onChange={(e) => setDraft((p) => ({ ...p, linkUrl: e.target.value || undefined }))}
               placeholder="https://..."
             />
             <div className="mt-1 text-xs text-primary-600">Optional: Upload erstellt automatisch einen Drive-Link.</div>
@@ -191,10 +207,10 @@ export default function DokumentePage() {
                   <div className="flex items-center gap-2">
                     <div className="truncate text-sm font-medium">{d.titel}</div>
                     <Badge>{d.kategorie}</Badge>
-                    {d.driveFileId ? <Badge variant="neutral">Drive</Badge> : null}
+                    {d.drive?.fileId ? <Badge variant="neutral">Drive</Badge> : null}
                   </div>
                   <div className="mt-0.5 text-xs text-primary-600">Update: {fmtDateShort(d.updatedAt)}</div>
-                  {d.beschreibung ? <div className="mt-1 text-sm text-primary-700">{d.beschreibung}</div> : null}
+                  {d.notizen ? <div className="mt-1 text-sm text-primary-700">{d.notizen}</div> : null}
                   {d.linkUrl ? (
                     <a className="mt-2 inline-block text-sm underline decoration-primary-300" href={d.linkUrl} target="_blank" rel="noreferrer">
                       Link öffnen

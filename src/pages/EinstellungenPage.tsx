@@ -7,7 +7,7 @@ import Textarea from '../components/Textarea';
 import { backendPing, backendSendEmail } from '../lib/api/elternratBackend';
 import { schulhelferGetEvents } from '../lib/api/schulhelferClient';
 import { availableSchoolYears } from '../lib/schuljahr';
-import type { PersistedState, Settings } from '../lib/types';
+import type { Settings } from '../lib/types';
 import { useAppStore } from '../state/store';
 
 function downloadText(filename: string, content: string, mime: string) {
