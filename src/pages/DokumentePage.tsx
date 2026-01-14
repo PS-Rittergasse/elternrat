@@ -36,7 +36,9 @@ export default function DokumentePage() {
       titel: '',
       beschreibung: '',
       kategorie: 'Sonstiges',
+      storage: 'link',
       linkUrl: '',
+      drive: undefined,
       tags: [],
       createdAt: now,
       updatedAt: now
@@ -51,7 +53,9 @@ export default function DokumentePage() {
       titel: '',
       beschreibung: '',
       kategorie: 'Sonstiges',
+      storage: 'link',
       linkUrl: '',
+      drive: undefined,
       tags: [],
       createdAt: now,
       updatedAt: now
@@ -65,11 +69,20 @@ export default function DokumentePage() {
       setStatusMsg('Titel fehlt');
       return;
     }
-    if (!draft.linkUrl.trim() && !draft.driveFileId) {
+    const hasLink = (draft.linkUrl ?? '').trim().length > 0;
+    const hasDrive = !!draft.drive?.fileId;
+    if (!hasLink && !hasDrive) {
       setStatusMsg('Link oder Upload fehlt');
       return;
     }
-    actions.upsertDocument({ ...draft, schuljahr: year });
+
+    const storage: DocumentItem['storage'] = hasDrive ? 'drive' : 'link';
+    const next: DocumentItem = {
+      ...draft,
+      schuljahr: year,
+      storage
+    };
+    actions.upsertDocument(next);
     setStatusMsg('Gespeichert');
     resetDraft();
   };
@@ -104,11 +117,15 @@ export default function DokumentePage() {
 
       setDraft((p) => ({
         ...p,
+        storage: 'drive',
         linkUrl: r.webViewLink,
-        driveFileId: r.fileId,
-        driveWebViewLink: r.webViewLink,
-        fileName: r.name,
-        mimeType: r.mimeType
+        drive: {
+          fileId: r.fileId,
+          name: r.name,
+          mimeType: r.mimeType,
+          size: r.size,
+          webViewLink: r.webViewLink
+        }
       }));
 
       setStatusMsg('Upload ok');
@@ -191,15 +208,24 @@ export default function DokumentePage() {
                   <div className="flex items-center gap-2">
                     <div className="truncate text-sm font-medium">{d.titel}</div>
                     <Badge>{d.kategorie}</Badge>
-                    {d.driveFileId ? <Badge variant="neutral">Drive</Badge> : null}
+                    {d.storage === 'drive' || d.drive ? <Badge variant="neutral">Drive</Badge> : null}
                   </div>
                   <div className="mt-0.5 text-xs text-primary-600">Update: {fmtDateShort(d.updatedAt)}</div>
                   {d.beschreibung ? <div className="mt-1 text-sm text-primary-700">{d.beschreibung}</div> : null}
-                  {d.linkUrl ? (
-                    <a className="mt-2 inline-block text-sm underline decoration-primary-300" href={d.linkUrl} target="_blank" rel="noreferrer">
-                      Link öffnen
-                    </a>
-                  ) : null}
+                  {(() => {
+                    const href = d.drive?.webViewLink ?? d.linkUrl;
+                    if (!href) return null;
+                    return (
+                      <a
+                        className="mt-2 inline-block text-sm underline decoration-primary-300"
+                        href={href}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Link öffnen
+                      </a>
+                    );
+                  })()}
                 </div>
                 <Button size="sm" variant="destructive" onClick={() => actions.deleteDocument(d.id)}>
                   Löschen
