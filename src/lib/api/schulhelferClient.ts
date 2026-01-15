@@ -11,8 +11,15 @@ export type SchulhelferEvent = {
 
 type ApiResponse<T> = { ok: true; data: T } | { ok: false; error: string };
 
+function extractUrl(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  const match = trimmed.match(/https?:\/\/[^\s'"]+/);
+  return match ? match[0] : trimmed;
+}
+
 function buildUrl(base: string, action: string, apiKey?: string) {
-  const u = new URL(base);
+  const u = new URL(extractUrl(base));
   u.searchParams.set('action', action);
   if (apiKey) u.searchParams.set('apiKey', apiKey);
   return u.toString();
@@ -20,7 +27,7 @@ function buildUrl(base: string, action: string, apiKey?: string) {
 
 export async function schulhelferGetEvents(settings: SchulhelferSettings): Promise<SchulhelferEvent[]> {
   if (!settings.enabled) throw new Error('Schulhelfer ist deaktiviert');
-  if (!settings.apiUrl) throw new Error('Schulhelfer-URL fehlt');
+  if (!extractUrl(settings.apiUrl)) throw new Error('Schulhelfer-URL fehlt');
 
   const url = buildUrl(settings.apiUrl, 'getEvents', settings.apiKey || undefined);
   const res = await fetch(url, { method: 'GET', redirect: 'follow' });
@@ -42,9 +49,9 @@ export async function schulhelferGetEvents(settings: SchulhelferSettings): Promi
 
 export async function schulhelferWrite(settings: SchulhelferSettings, action: 'createEvent' | 'updateEvent' | 'deleteEvent', payload: any) {
   if (!settings.enabled) throw new Error('Schulhelfer ist deaktiviert');
-  if (!settings.apiUrl) throw new Error('Schulhelfer-URL fehlt');
+  if (!extractUrl(settings.apiUrl)) throw new Error('Schulhelfer-URL fehlt');
 
-  const res = await fetch(settings.apiUrl, {
+  const res = await fetch(extractUrl(settings.apiUrl), {
     method: 'POST',
     redirect: 'follow',
     body: JSON.stringify({ action, apiKey: settings.apiKey || '', ...payload })
