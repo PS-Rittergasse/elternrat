@@ -15,7 +15,7 @@ export function defaultState(): PersistedState {
       timezone: 'Europe/Zurich',
       schulhelfer: {
         enabled: false,
-        apiUrl: '',
+        apiUrl: 'https://script.google.com/macros/s/AKfycbzeyNTd8C1rmas-Nk5sF--Aa2Ck6ugw-wd6ts2slxpaVV8M9JzmKZW7GzipXYRsDbEf/exec',
         apiKey: ''
       },
       backend: {
@@ -57,10 +57,39 @@ export function loadState(): PersistedState {
     if (!parsed || parsed.schemaVersion !== 1) {
       return defaultState();
     }
-    return parsed;
+    return applyDefaults(parsed);
   } catch {
     return defaultState();
   }
+}
+
+function applyDefaults(state: PersistedState): PersistedState {
+  const defaults = defaultState();
+  const schulhelferDefaults = defaults.settings.schulhelfer;
+  const schulhelferState = state.settings?.schulhelfer ?? ({} as PersistedState['settings']['schulhelfer']);
+  const apiUrl = (schulhelferState.apiUrl || '').trim();
+
+  return {
+    ...defaults,
+    ...state,
+    settings: {
+      ...defaults.settings,
+      ...state.settings,
+      schulhelfer: {
+        ...schulhelferDefaults,
+        ...schulhelferState,
+        apiUrl: apiUrl ? schulhelferState.apiUrl : schulhelferDefaults.apiUrl
+      },
+      backend: {
+        ...defaults.settings.backend,
+        ...state.settings?.backend
+      }
+    },
+    entities: {
+      ...defaults.entities,
+      ...state.entities
+    }
+  };
 }
 
 export function saveState(state: PersistedState) {

@@ -48,7 +48,7 @@ Upload `dist/` auf euren Static Host.
 Ziel: keine OAuth-Authentifikation im Frontend. Das Backend läuft im Elternrat-Gmail.
 
 ### 1) Apps Script Projekt erstellen
-- Im Elternrat Gmail Konto `script.google.com` öffnen
+- Im Elternrat Gmail Konto `rittergassehelferliste@gmail.com` `script.google.com` öffnen
 - Neues Projekt erstellen
 - Dateien aus `apps-script/` übernehmen:
   - `Code.gs`

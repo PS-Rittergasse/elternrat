@@ -13,11 +13,13 @@ import { useAppStore } from '../state/store';
 
 const categories: DocumentCategory[] = [
   'Allgemein',
+  'Protokolle',
   'Sitzungen',
   'Finanzen',
   'Kommunikation',
   'Events',
-  'Vorlagen'
+  'Vorlagen',
+  'Sonstiges'
 ];
 
 export default function DokumentePage() {
@@ -43,10 +45,7 @@ export default function DokumentePage() {
       titel: '',
       kategorie: 'Allgemein',
       notizen: '',
-      storage: 'link',
-      linkUrl: undefined,
       beschreibung: '',
-      kategorie: 'Sonstiges',
       storage: 'link',
       linkUrl: '',
       drive: undefined,
@@ -64,10 +63,7 @@ export default function DokumentePage() {
       titel: '',
       kategorie: 'Allgemein',
       notizen: '',
-      storage: 'link',
-      linkUrl: undefined,
       beschreibung: '',
-      kategorie: 'Sonstiges',
       storage: 'link',
       linkUrl: '',
       drive: undefined,
@@ -84,24 +80,18 @@ export default function DokumentePage() {
       setStatusMsg('Titel fehlt');
       return;
     }
-    if (!draft.linkUrl && !draft.drive?.fileId) {
-      setStatusMsg('Link oder Upload fehlt');
-      return;
-    }
-    const storage = draft.drive?.fileId ? 'drive' : 'link';
-    actions.upsertDocument({ ...draft, schuljahr: year, storage });
     const hasLink = (draft.linkUrl ?? '').trim().length > 0;
     const hasDrive = !!draft.drive?.fileId;
     if (!hasLink && !hasDrive) {
       setStatusMsg('Link oder Upload fehlt');
       return;
     }
-
     const storage: DocumentItem['storage'] = hasDrive ? 'drive' : 'link';
     const next: DocumentItem = {
       ...draft,
       schuljahr: year,
-      storage
+      storage,
+      linkUrl: hasLink ? draft.linkUrl?.trim() : undefined
     };
     actions.upsertDocument(next);
     setStatusMsg('Gespeichert');
@@ -232,19 +222,10 @@ export default function DokumentePage() {
                   <div className="flex items-center gap-2">
                     <div className="truncate text-sm font-medium">{d.titel}</div>
                     <Badge>{d.kategorie}</Badge>
-                    {d.drive?.fileId ? <Badge variant="neutral">Drive</Badge> : null}
-                  </div>
-                  <div className="mt-0.5 text-xs text-primary-600">Update: {fmtDateShort(d.updatedAt)}</div>
-                  {d.notizen ? <div className="mt-1 text-sm text-primary-700">{d.notizen}</div> : null}
-                  {d.linkUrl ? (
-                    <a className="mt-2 inline-block text-sm underline decoration-primary-300" href={d.linkUrl} target="_blank" rel="noreferrer">
-                      Link öffnen
-                    </a>
-                  ) : null}
                     {d.storage === 'drive' || d.drive ? <Badge variant="neutral">Drive</Badge> : null}
                   </div>
                   <div className="mt-0.5 text-xs text-primary-600">Update: {fmtDateShort(d.updatedAt)}</div>
-                  {d.beschreibung ? <div className="mt-1 text-sm text-primary-700">{d.beschreibung}</div> : null}
+                  {d.notizen ? <div className="mt-1 text-sm text-primary-700">{d.notizen}</div> : null}
                   {(() => {
                     const href = d.drive?.webViewLink ?? d.linkUrl;
                     if (!href) return null;
